@@ -1,0 +1,122 @@
+.book-pdf-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    background: #c0392b;
+    color: #fff;
+    border: 2px solid #8e2a1f;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    box-shadow: 0 3px 0 #6b1f17, 0 4px 12px rgba(0, 0, 0, 0.35);
+    flex-shrink: 0;
+    user-select: none;
+}
+
+.book-pdf-btn:hover {
+    background: #e74c3c;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 0 #6b1f17, 0 6px 16px rgba(0, 0, 0, 0.45);
+}
+
+.book-pdf-btn:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 #6b1f17, 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+.book-pdf-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+#pdfPrintContainer { display: none; }
+
+@media print {
+    body > *:not(#pdfPrintContainer) { display: none !important; }
+    #pdfPrintContainer { display: block !important; }
+
+    .pdf-book-page {
+        page-break-after: always;
+        break-after: page;
+        width: 100%;
+        min-height: 100vh;
+        padding: 30px 36px;
+        background: #fcf6ec;
+        background-image: radial-gradient(circle at 30% 20%, rgba(255, 250, 235, 0.95) 0%, #efe5d5 100%);
+        color: #2e241b;
+        font-family: 'Inter', 'Noto Sans Devanagari', 'Mangal', 'Nirmala UI', sans-serif;
+        box-sizing: border-box;
+        position: relative;
+        overflow: hidden;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    .pdf-book-page:last-child { page-break-after: auto; break-after: auto; }
+    .pdf-book-page * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+
+    .pdf-book-page .book-chapter-tag {
+        display: inline-block;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        color: #8a7560;
+        background: rgba(184, 166, 144, 0.25);
+        padding: 4px 12px;
+        border-radius: 20px;
+        margin-bottom: 12px;
+        border-left: 3px solid #b8a690;
+    }
+    .pdf-book-page .book-topic-title {
+        font-size: 15px;
+        font-weight: 600;
+        color: #6b5540;
+        margin-bottom: 12px;
+        padding-bottom: 6px;
+        border-bottom: 1px dashed #d9c7b0;
+        line-height: 1.35;
+    }
+    .pdf-book-page .book-concept-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: #3e2c1e;
+        margin-bottom: 16px;
+        line-height: 1.35;
+    }
+    .pdf-book-page .book-concept-body {
+        font-family: 'Consolas', 'Monaco', 'Courier New', 'Noto Sans Devanagari', monospace;
+        font-size: 12px;
+        line-height: 1.7;
+        color: #2c221a;
+        background: rgba(240, 232, 220, 0.55);
+        padding: 16px 18px;
+        border-radius: 6px;
+        border: 1px solid #e0d2c0;
+        white-space: pre-wrap;
+        word-break: break-word;
+        overflow-wrap: break-word;
+    }
+    .pdf-book-page .book-page-number {
+        position: absolute;
+        bottom: 20px;
+        right: 36px;
+        font-size: 10px;
+        color: #a89880;
+        letter-spacing: 1px;
+        font-weight: 500;
+    }
+    .pdf-book-page .book-lang-toggle { display: none !important; }
+}
+
+@media (max-width: 600px) {
+    .book-pdf-btn { font-size: 0.7rem; padding: 5px 10px; }
+}
+@media (max-width: 480px) {
+    .book-pdf-btn { font-size: 0.66rem; padding: 4px 8px; }
+}

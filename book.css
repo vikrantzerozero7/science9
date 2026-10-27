@@ -1,0 +1,5 @@
+/* ==========================================================
+   book.css — flip timing variable only
+   (all book layout lives in booklogic.css)
+   ========================================================== */
+:root { --book-flip-ms: 450ms; }

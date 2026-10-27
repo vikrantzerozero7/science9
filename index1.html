@@ -1,0 +1,570 @@
+<!-- index.html — Multi-Config Mind Map (File 1 structure + File 2 fixes) -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mind Map | Multi-Config</title>
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <!-- ===== CONFIGURATION BLOCK ===== -->
+    <script>
+        window.PAGE_CONFIG = {
+            title: {
+                english: "Mind Map | Multi-Config",
+                hindi: "माइंड मैप | मल्टी-कॉन्फिग"
+            },
+            sidebarTitle: {
+                english: "Mind Map",
+                hindi: "माइंड मैप"
+            }
+        };
+
+        // ============================================================
+        // SUBJECT_TABS — HARD-CODED
+        // ============================================================
+        window.SUBJECT_TABS = {
+            ENABLED: true,
+            DEFAULT_ACTIVE: 0,
+            MAIN_TABS: [
+                {
+                    id: "social",
+                    name: { english: "📚 Social Science", hindi: "📚 सामाजिक विज्ञान" },
+                    subTabs: []
+                },
+                {
+                    id: "science9",
+                    name: { english: "🔬 Science 9", hindi: "🔬 विज्ञान 9" },
+                    subTabs: []
+                }
+            ],
+            OTHER_SUB_TABS: []
+        };
+
+        window.MINDMAP_LAYERS = {
+            subject: { level: 0, hasChildren: true, expandable: true },
+            chapter: { level: 1, hasChildren: true, expandable: true },
+            topic: { level: 2, hasChildren: true, expandable: true },
+            concept: { level: 3, hasChildren: true, expandable: true, hasDescription: true },
+            description: { level: 4, hasChildren: false, expandable: false }
+        };
+
+        window.UI_CONFIG = {
+            sidebar: {
+                showLanguageSettings: true,
+                showInstructions: true,
+                showContentInfo: true,
+                showLegend: true,
+                showFooter: true
+            }
+        };
+
+        // ============================================================
+        // CONFIG_REGISTRY — subject config file paths
+        // ============================================================
+        window.CONFIG_REGISTRY = {
+            social:    "configs/social-config.js",
+            science9:  "configs/science-config.js"
+        };
+
+        window.__GLOBAL_NAME_MAP = {
+            social:    'SOCIAL_SCIENCE2_CONFIG',
+            science9:  'SCIENCE9_CONFIG'
+        };
+
+        console.log('📋 SUBJECT_TABS ready (hard-coded):', window.SUBJECT_TABS.MAIN_TABS.map(t => t.id));
+    </script>
+
+    <!-- ===== STYLESHEETS ===== -->
+    <link rel="stylesheet" href="sidebar.css">
+    <link rel="stylesheet" href="upbar.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="booklogic.css">
+    <link rel="stylesheet" href="book-page-slider.css">
+    <link rel="stylesheet" href="book-pdf-export.css">
+    <link rel="stylesheet" href="voice-viewer-style.css">
+
+    <!-- Chatbot CSS -->
+    <style>
+        .chatbot-float-btn {
+            position: fixed; bottom: 24px; right: 24px;
+            width: 58px; height: 58px; border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff; border: none; font-size: 24px; cursor: pointer;
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.45);
+            z-index: 9998; display: flex; align-items: center; justify-content: center;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+        .chatbot-float-btn:hover { transform: scale(1.08); }
+        .chatbot-float-btn.active { background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%); }
+
+        .chatbot-window {
+            position: fixed; bottom: 96px; right: 24px;
+            width: 380px; max-width: calc(100vw - 32px);
+            height: 500px; max-height: calc(100vh - 120px);
+            background: #fff; border-radius: 16px;
+            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.18);
+            display: flex; flex-direction: column; overflow: hidden;
+            z-index: 9999;
+            transform: translateY(20px) scale(0.95); opacity: 0; pointer-events: none;
+            transition: transform 0.25s ease, opacity 0.25s ease;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        .chatbot-window.active { transform: translateY(0) scale(1); opacity: 1; pointer-events: auto; }
+        .chatbot-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff; padding: 12px 14px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .chatbot-header-left { display: flex; align-items: center; gap: 10px; }
+        .chatbot-avatar { font-size: 22px; }
+        .chatbot-title { font-size: 14px; font-weight: 600; }
+        .chatbot-status { font-size: 10px; opacity: 0.85; margin-top: 2px; }
+        .chatbot-header-actions { display: flex; gap: 6px; }
+        .chatbot-icon-btn {
+            background: rgba(255, 255, 255, 0.2); border: none; color: #fff;
+            width: 28px; height: 28px; border-radius: 6px; cursor: pointer;
+            font-size: 13px; display: flex; align-items: center; justify-content: center;
+        }
+        .chatbot-icon-btn:hover { background: rgba(255, 255, 255, 0.35); }
+        .chatbot-messages {
+            flex: 1 1 0; min-height: 0; overflow-y: auto;
+            padding: 14px; background: #f8f9fb;
+            display: flex; flex-direction: column; gap: 10px;
+        }
+        .chatbot-msg { max-width: 88%; padding: 10px 14px; border-radius: 14px; font-size: 13px; line-height: 1.5; }
+        .chatbot-msg.user { align-self: flex-end; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; }
+        .chatbot-msg.ai { align-self: flex-start; background: #fff; border: 1px solid #e2e8f0; }
+        .chatbot-typing { display: none; padding: 8px 16px; gap: 4px; background: #f8f9fb; }
+        .chatbot-typing.active { display: flex; align-items: center; }
+        .chatbot-typing span {
+            width: 7px; height: 7px; background: #a0aec0;
+            border-radius: 50%; animation: chatbotTyping 1.2s infinite;
+        }
+        .chatbot-typing span:nth-child(2) { animation-delay: 0.15s; }
+        .chatbot-typing span:nth-child(3) { animation-delay: 0.3s; }
+        @keyframes chatbotTyping {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+            30% { transform: translateY(-5px); opacity: 1; }
+        }
+        .chatbot-input-bar {
+            display: flex; gap: 8px; padding: 10px 12px;
+            background: #fff; border-top: 1px solid #e2e8f0;
+        }
+        .chatbot-input {
+            flex: 1; resize: none; border: 1px solid #e2e8f0;
+            border-radius: 10px; padding: 9px 12px; font-size: 13px;
+            font-family: inherit; outline: none;
+        }
+        .chatbot-send-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff; border: none; width: 40px; border-radius: 10px;
+            cursor: pointer; font-size: 16px;
+        }
+        @media (max-width: 480px) {
+            .chatbot-window {
+                width: calc(100vw - 16px);
+                height: calc(100vh - 100px);
+                right: 8px; bottom: 84px;
+            }
+            .chatbot-float-btn { bottom: 16px; right: 16px; width: 52px; height: 52px; }
+        }
+    </style>
+
+    <!-- Sidebar start-state -->
+    <script>
+    (function applyInitialSidebarState() {
+        var saved = null;
+        try { saved = localStorage.getItem('sidebar_collapsed'); } catch (e) {}
+        var collapsed = (saved === null) ? true : (saved === '1');
+        window.__SIDEBAR_COLLAPSED__ = collapsed;
+    })();
+    </script>
+
+    <!-- Early-hide sidebar (removed later by sidebar.js) -->
+    <script>
+    (function () {
+        'use strict';
+        var earlyStyle = document.createElement('style');
+        earlyStyle.id = 'sidebar-initial-collapse';
+        earlyStyle.textContent =
+            '#sidebar { width: 0 !important; min-width: 0 !important; overflow: hidden !important; }' +
+            '#sidebar > * { visibility: hidden !important; }';
+        document.head.appendChild(earlyStyle);
+    })();
+    </script>
+</head>
+
+<body>
+
+<!-- ============== SIDEBAR ============== -->
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <h2 class="sidebar-title" id="sidebar-title">Mind Map</h2>
+        <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">◀</button>
+    </div>
+
+    <div class="sidebar-content">
+        <div class="section">
+            <h3>🧭 Navigation</h3>
+            <div class="navigation-container" id="navigation-content"></div>
+        </div>
+        <hr>
+        <div class="section" id="language-section">
+            <h3>🌐 Language Settings</h3>
+            <div class="radio-group">
+                <label class="radio-label"><input type="radio" name="language" value="english" checked> English</label>
+                <label class="radio-label"><input type="radio" name="language" value="hindi"> हिंदी</label>
+            </div>
+        </div>
+        <hr>
+        <div class="section" id="view-mode-section">
+            <h3>👁️ View Mode</h3>
+            <div class="view-mode-radio-group">
+                <label class="radio-label"><input type="radio" name="viewMode" value="mindmap"><span>🧠 Mind Map</span></label>
+                <label class="radio-label"><input type="radio" name="viewMode" value="book" checked><span>📖 Topicwise Book</span></label>
+                <label class="radio-label"><input type="radio" name="viewMode" value="complete"><span>📚 Complete Book</span></label>
+            </div>
+        </div>
+        <hr>
+        <div class="section" id="instructions-section">
+            <h3>📋 Instructions</h3>
+            <div class="instructions" id="instructions-content">
+                • <strong>Double-click</strong> on subject to show/hide everything<br>
+                • <strong>Double-click</strong> on chapter to expand/collapse<br>
+                • <strong>Double-click</strong> on topic to expand/collapse<br>
+                • <strong>Double-click</strong> on concept to show/hide details
+            </div>
+        </div>
+        <hr>
+        <div class="section" id="content-section">
+            <h3>📊 Content Info</h3>
+            <div class="content-info" id="content-info">Loading...</div>
+        </div>
+        <hr>
+        <div class="section" id="legend-section">
+            <h3>🎨 Legend</h3>
+            <div class="legend" id="legend-content">
+                <div class="legend-item"><span class="legend-color subject"></span> Subject</div>
+                <div class="legend-item"><span class="legend-color chapter"></span> Chapter</div>
+                <div class="legend-item"><span class="legend-color topic"></span> Topic</div>
+                <div class="legend-item"><span class="legend-color concept"></span> Concept</div>
+                <div class="legend-item"><span class="legend-color description"></span> Description</div>
+            </div>
+        </div>
+        <div class="footer" id="footer">Mind Map · Multi-Config</div>
+    </div>
+</div>
+
+<!-- ============== MAIN ============== -->
+<div class="main-content" id="mainContent">
+    <div class="sticky-header" id="stickyHeader">
+        <button class="tabs-toggle-btn" id="tabsToggleBtn" title="Hide/Show Topics">◀</button>
+        <div class="tabs-wrapper" id="tabs-container"></div>
+        <div class="badge" id="language-badge">English</div>
+    </div>
+
+    <div id="container" class="mindmap-view"></div>
+
+    <!-- TOPICWISE BOOK -->
+    <div class="book-view" id="bookView">
+        <div class="book-progress-bar">
+            <div class="book-progress-info">
+                <span id="bookProgressLabel">Syllabus</span>
+                <span id="bookProgressCounter">1 / 1</span>
+            </div>
+            <div class="book-progress-track">
+                <div class="book-progress-fill" id="bookProgressFill"></div>
+            </div>
+        </div>
+        <div class="book-syllabus-bar">
+            <button class="book-syllabus-btn" id="bookSyllabusBtn" title="Quick jump to any topic">
+                <span class="book-syllabus-text">Syllabus</span>
+                <span class="book-syllabus-caret" id="bookSyllabusCaret">▾</span>
+            </button>
+            <div class="book-search-box">
+                <input type="text" id="bookSearchInput" class="book-search-input" placeholder="Search keywords..." autocomplete="off">
+                <button class="book-search-btn" id="bookSearchBtn" title="Search">
+                    <span class="book-search-icon">🔍</span>
+                    <span class="book-search-label">Search</span>
+                </button>
+                <div class="book-search-status" id="bookSearchStatus"></div>
+                <div class="book-search-nav" id="bookSearchNav">
+                    <button class="book-search-nav-btn" id="bookSearchLeftBtn" title="Previous match">◀</button>
+                    <button class="book-search-nav-btn" id="bookSearchRightBtn" title="Next match">▶</button>
+                </div>
+            </div>
+            <div class="book-syllabus-panel" id="bookSyllabusPanel">
+                <div class="book-syllabus-list" id="bookSyllabusList"></div>
+            </div>
+        </div>
+        <div class="book-stage">
+            <button class="book-arrow-btn" id="bookLeftBtn" title="Previous page (← arrow)">◀</button>
+            <div class="book" id="book">
+                <div class="book-page book-page-left"  id="bookLeftPage"></div>
+                <div class="book-page book-page-right" id="bookRightPage"></div>
+                <div class="flip-page" id="flipPage">
+                    <div class="face face-front" id="faceFront"></div>
+                    <div class="face face-back"  id="faceBack"></div>
+                </div>
+                <div class="flip-shadow" id="flipShadow"></div>
+            </div>
+            <button class="book-arrow-btn" id="bookRightBtn" title="Next page (→ arrow)">▶</button>
+        </div>
+        <div class="book-page-slider">
+            <input type="range" id="bookPageSlider" class="page-slider" min="0" max="0" value="0" step="1">
+            <span class="page-slider-label" id="bookSliderLabel">0 / 0</span>
+        </div>
+        <div class="book-hint">[SYLLABUS] → [1, 2] → [3, 4] … · click 📑 Syllabus · use ← → arrow keys 📖</div>
+    </div>
+
+    <!-- COMPLETE BOOK -->
+    <div class="complete-book-view" id="completeBookView">
+        <div class="book-progress-bar">
+            <div class="book-progress-info">
+                <span id="cbProgressLabel">Complete Book</span>
+                <span id="cbProgressCounter">1 / 1</span>
+            </div>
+            <div class="book-progress-track">
+                <div class="book-progress-fill" id="cbProgressFill"></div>
+            </div>
+        </div>
+        <div class="book-syllabus-bar">
+            <button class="book-syllabus-btn" id="cbSyllabusBtn" title="Quick jump to any topic">
+                <span class="book-syllabus-text">Syllabus</span>
+                <span class="book-syllabus-caret" id="cbSyllabusCaret">▾</span>
+            </button>
+            <div class="book-search-box">
+                <input type="text" id="cbSearchInput" class="book-search-input" placeholder="Search keywords..." autocomplete="off">
+                <button class="book-search-btn" id="cbSearchBtn" title="Search">
+                    <span class="book-search-icon">🔍</span>
+                    <span class="book-search-label">Search</span>
+                </button>
+                <div class="book-search-status" id="cbSearchStatus"></div>
+                <div class="book-search-nav" id="cbSearchNav">
+                    <button class="book-search-nav-btn" id="cbSearchLeftBtn" title="Previous match">◀</button>
+                    <button class="book-search-nav-btn" id="cbSearchRightBtn" title="Next match">▶</button>
+                </div>
+            </div>
+            <div class="book-syllabus-panel" id="cbSyllabusPanel">
+                <div class="book-syllabus-list" id="cbSyllabusList"></div>
+            </div>
+        </div>
+        <div class="book-stage">
+            <button class="book-arrow-btn" id="cbLeftBtn" title="Previous spread (← arrow)">◀</button>
+            <div class="book" id="completeBook">
+                <div class="book-page book-page-left"  id="cbLeftPage"></div>
+                <div class="book-page book-page-right" id="cbRightPage"></div>
+                <div class="flip-page" id="cbFlipPage">
+                    <div class="face face-front" id="cbFaceFront"></div>
+                    <div class="face face-back"  id="cbFaceBack"></div>
+                </div>
+                <div class="flip-shadow" id="cbFlipShadow"></div>
+            </div>
+            <button class="book-arrow-btn" id="cbRightBtn" title="Next spread (→ arrow)">▶</button>
+        </div>
+        <div class="book-page-slider">
+            <input type="range" id="cbPageSlider" class="page-slider" min="0" max="0" value="0" step="1">
+            <span class="page-slider-label" id="cbSliderLabel">0 / 0</span>
+        </div>
+        <div class="book-hint">📚 Complete Book · all subjects · click 📑 Syllabus · 🔍 search · flip with ← → 📖</div>
+    </div>
+
+    <!-- HEATMAP -->
+    <div class="heatmap-view" id="heatmapView">
+        <div id="heatmapContainer"></div>
+    </div>
+</div>
+
+<!-- ============== CHATBOT UI ============== -->
+<button id="chatbotFloatBtn" class="chatbot-float-btn">💬</button>
+<div id="chatbotWindow" class="chatbot-window">
+    <div class="chatbot-header">
+        <div class="chatbot-header-left">
+            <span class="chatbot-avatar">🤖</span>
+            <div class="chatbot-header-text">
+                <div class="chatbot-title">RAG Assistant</div>
+                <div class="chatbot-status" id="chatbotStatus">Loading...</div>
+            </div>
+        </div>
+        <div class="chatbot-header-actions">
+            <button id="chatbotClear" class="chatbot-icon-btn" title="Clear chat">🗑️</button>
+            <button id="chatbotCloseBtn" class="chatbot-icon-btn" title="Close">✕</button>
+        </div>
+    </div>
+    <div class="chatbot-messages" id="chatbotMessages"></div>
+    <div class="chatbot-typing" id="chatbotTyping"><span></span><span></span><span></span></div>
+    <div class="chatbot-input-bar">
+        <textarea id="chatbotInput" class="chatbot-input" placeholder="Ask anything... (Enter to send)" rows="1"></textarea>
+        <button id="chatbotSend" class="chatbot-send-btn">➤</button>
+    </div>
+</div>
+
+<!-- ============== CONFIG PRE-LOADER ============== -->
+<script>
+(function () {
+    'use strict';
+    console.log('🔄 Config Pre-Loader: Starting...');
+
+    var registry = window.CONFIG_REGISTRY || {};
+    var configKeys = Object.keys(registry);
+    var totalConfigs = configKeys.length;
+    var GM = window.__GLOBAL_NAME_MAP || {};
+
+    if (totalConfigs === 0) {
+        console.warn('⚠️ Registry empty — dispatching allConfigsReady immediately');
+        window.dispatchEvent(new CustomEvent('allConfigsReady', { detail: { count: 0 } }));
+        return;
+    }
+
+    var loadedCount = 0;
+
+    configKeys.forEach(function (key) {
+        var path = registry[key];
+        var globalName = GM[key] || (key.toUpperCase() + '_CONFIG');
+
+        var script = document.createElement('script');
+        script.src = path;
+        script.dataset.configKey = key;
+        script.async = false;
+
+        script.onload = function () {
+            var loaded = window[globalName];
+            loadedCount++;
+            if (loaded && loaded.chapters) {
+                console.log('✅ Config loaded: ' + key + ' → ' + globalName + ' (' + loaded.chapters.length + ' ch) [' + loadedCount + '/' + totalConfigs + ']');
+            } else {
+                console.warn('⚠️ Config loaded but global invalid: ' + globalName);
+            }
+            if (loadedCount === totalConfigs) {
+                console.log('🎉 All configs pre-loaded!');
+                window.dispatchEvent(new CustomEvent('allConfigsReady', { detail: { count: totalConfigs } }));
+            }
+        };
+
+        script.onerror = function () {
+            loadedCount++;
+            console.error('❌ Failed to load config: ' + path);
+            if (loadedCount === totalConfigs) {
+                window.dispatchEvent(new CustomEvent('allConfigsReady', { detail: { count: totalConfigs, errors: true } }));
+            }
+        };
+
+        document.head.appendChild(script);
+    });
+
+    console.log('🔄 Pre-loading ' + totalConfigs + ' configs...');
+})();
+</script>
+
+<!-- ============== CONFIG DISCOVERY ADAPTER ============== -->
+<script>
+(function () {
+    'use strict';
+
+    function findConfig(key) {
+        var GM = window.__GLOBAL_NAME_MAP || {};
+        var globalName = GM[key] || (key.toUpperCase() + '_CONFIG');
+        if (window[globalName] && window[globalName].chapters) return window[globalName];
+        return null;
+    }
+
+    window.__CONFIG_DISCOVERY = {
+        getAllConfigs: function () {
+            var registry = window.CONFIG_REGISTRY || {};
+            var result = [];
+            Object.keys(registry).forEach(function (key) {
+                var cfg = findConfig(key);
+                if (cfg) result.push({ key: key, config: cfg });
+            });
+            return result;
+        },
+        findConfigById: function (id) { return findConfig(id); },
+        getActiveSubjectKey: function () {
+            return window.__currentSubjectKey || null;
+        }
+    };
+    console.log('✅ __CONFIG_DISCOVERY ready');
+})();
+</script>
+
+<!-- ============== CORE SCRIPTS (bottom) ============== -->
+<script src="script.js"></script>
+<script src="upbar.js"></script>
+<script src="sidebar.js"></script>
+<script src="booklogic.js"></script>
+<script src="book-page-slider.js"></script>
+<script src="book-pdf-export.js"></script>
+<script src="voice-viewer-script.js"></script>
+<script src="chatbot/chatbot-rag.js"></script>
+
+<!-- ============== BRIDGE: Subject + Language ============== -->
+<script>
+(function () {
+    'use strict';
+
+    window.__onSubjectChanged = function (key) {
+        console.log('🔁 Subject changed:', key);
+        if (key) window.__currentSubjectKey = key;
+
+        if (window.BookView && window.BookView.reload) window.BookView.reload();
+        if (window.CompleteBookView && window.CompleteBookView.reload) window.CompleteBookView.reload();
+    };
+
+    document.querySelectorAll('input[name="language"]').forEach(function (radio) {
+        radio.addEventListener('change', function () {
+            if (!this.checked) return;
+            var lang = this.value;
+            document.body.classList.toggle('hindi-active', lang === 'hindi');
+            if (window.BookView && window.BookView.setLanguage) window.BookView.setLanguage(lang);
+            if (window.CompleteBookView && window.CompleteBookView.setLanguage) window.CompleteBookView.setLanguage(lang);
+            document.dispatchEvent(new CustomEvent('languagechange', { detail: { language: lang } }));
+        });
+    });
+
+    console.log('✅ Bridge installed');
+})();
+</script>
+
+<!-- ============== TABS COLLAPSE TOGGLE (fallback) ============== -->
+<script>
+(function () {
+    'use strict';
+    var stickyHeader  = document.getElementById('stickyHeader');
+    var tabsToggleBtn = document.getElementById('tabsToggleBtn');
+    if (!stickyHeader || !tabsToggleBtn) return;
+
+    // upbar.js already binds and defaults to collapsed; skip if bound
+    if (tabsToggleBtn.dataset.bound === '1') return;
+
+    function setCollapsed(collapsed) {
+        if (collapsed) {
+            stickyHeader.classList.add('tabs-collapsed');
+            tabsToggleBtn.textContent = '▶';
+            tabsToggleBtn.title = 'Show Topics';
+        } else {
+            stickyHeader.classList.remove('tabs-collapsed');
+            tabsToggleBtn.textContent = '◀';
+            tabsToggleBtn.title = 'Hide Topics';
+        }
+    }
+
+    tabsToggleBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var isCollapsed = stickyHeader.classList.contains('tabs-collapsed');
+        setCollapsed(!isCollapsed);
+        setTimeout(function () {
+            if (typeof window.draw === 'function') window.draw();
+        }, 320);
+    });
+
+    setCollapsed(false);
+})();
+</script>
+
+</body>
+</html>
